@@ -1,0 +1,1 @@
+{"service":{"host":"localhost","port":8080,"timeoutSeconds":30},"logging":{"level":"info","redact":["authorization"]},"features":{"audit":false}}

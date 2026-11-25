@@ -1,0 +1,1 @@
+{"service":{"host":"service.internal","timeoutSeconds":15},"logging":{"redact":["authorization","cookie"]},"features":{"audit":true}}

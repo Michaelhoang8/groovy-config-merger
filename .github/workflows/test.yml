@@ -1,0 +1,23 @@
+name: test
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Groovy 4.0.26 jars
+        run: |
+          mkdir -p .tools
+          curl -fsSL https://repo.maven.apache.org/maven2/org/apache/groovy/groovy/4.0.26/groovy-4.0.26.jar -o .tools/groovy.jar
+          curl -fsSL https://repo.maven.apache.org/maven2/org/apache/groovy/groovy-json/4.0.26/groovy-json-4.0.26.jar -o .tools/groovy-json.jar
+          echo 'ae3196ed31fa11e8506f9c40a6b34fdaff06a8eeda78a8a6ebaeb1a2a0ad35dc  .tools/groovy.jar' | sha256sum -c -
+          echo 'e51ee94966ff3e5bced37a16543b3f54cb5b1d8de640ddc673a4f2d07701efff  .tools/groovy-json.jar' | sha256sum -c -
+      - run: java -cp '.tools/*:src' groovy.ui.GroovyMain test/MergerTest.groovy
+      - run: java -cp '.tools/*:src' groovy.ui.GroovyMain bin/merge.groovy override fixtures/base.json fixtures/production.json
