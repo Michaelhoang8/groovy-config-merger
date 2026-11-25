@@ -15,8 +15,16 @@ jobs:
       - name: Install Groovy 4.0.26 jars
         run: |
           mkdir -p .tools
-          curl -fsSL https://repo.maven.apache.org/maven2/org/apache/groovy/groovy/4.0.26/groovy-4.0.26.jar -o .tools/groovy.jar
-          curl -fsSL https://repo.maven.apache.org/maven2/org/apache/groovy/groovy-json/4.0.26/groovy-json-4.0.26.jar -o .tools/groovy-json.jar
+          fetch_jar() {
+            local module="$1"
+            local artifact="org/apache/groovy/${module}/4.0.26/${module}-4.0.26.jar"
+            curl -fsSL --retry 4 --retry-delay 5 --retry-max-time 90 --connect-timeout 15 --max-time 60 \
+              "https://repo.maven.apache.org/maven2/${artifact}" -o ".tools/${module}.jar" ||
+            curl -fsSL --retry 4 --retry-delay 5 --retry-max-time 90 --connect-timeout 15 --max-time 60 \
+              "https://repo1.maven.org/maven2/${artifact}" -o ".tools/${module}.jar"
+          }
+          fetch_jar groovy
+          fetch_jar groovy-json
           echo 'ae3196ed31fa11e8506f9c40a6b34fdaff06a8eeda78a8a6ebaeb1a2a0ad35dc  .tools/groovy.jar' | sha256sum -c -
           echo 'e51ee94966ff3e5bced37a16543b3f54cb5b1d8de640ddc673a4f2d07701efff  .tools/groovy-json.jar' | sha256sum -c -
       - run: java -cp '.tools/*:src' groovy.ui.GroovyMain test/MergerTest.groovy
